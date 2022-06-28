@@ -1,0 +1,38 @@
+version: '3'
+services:
+  openldap:
+    image: docker.io/bitnami/openldap:latest
+    container_name: openldap
+    hostname: openldap
+    restart: always
+    networks:
+      - ldap
+    ports:
+      - "1389:1389"
+    volumes:
+      - "./openldap:/bitnami/openldap:rw"
+    # for docker-compose first step
+    # environment:
+    #   - "LDAP_ROOT=dc=example,dc=com"
+    #   - "LDAP_ADMIN_USERNAME=admin"
+    #   - "LDAP_ADMIN_PASSWORD=qwer4321!"
+
+  ldap-account-manager:
+    image: docker.io/ldapaccountmanager/lam:latest
+    container_name: ldap-account-manager
+    hostname: ldap-account-manager
+    restart: always
+    networks:
+      - ldap
+    volumes:
+      - "./ldap-account-manager/config.cfg:/etc/ldap-account-manager/config.cfg:rw"
+      - "./ldap-account-manager/config:/var/lib/ldap-account-manager/config:rw"
+    environment:
+      - "LAM_SKIP_PRECONFIGURE=true"
+      - "LAM_LANG=en_US"
+    depends_on:
+      - openldap
+
+networks:
+  ldap:
+    external: true
